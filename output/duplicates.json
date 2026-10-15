@@ -1,0 +1,676 @@
+{
+  "documents": [
+    {
+      "id": null,
+      "source": "documents/D-001.pdf",
+      "row": null,
+      "original_source": "documents/D-001.docx",
+      "original_row": null,
+      "reason": "Тот же договор в другом формате (по реквизитам манифеста)"
+    },
+    {
+      "id": null,
+      "source": "documents/D-002.pdf",
+      "row": null,
+      "original_source": "documents/D-002.docx",
+      "original_row": null,
+      "reason": "Тот же договор в другом формате (по реквизитам манифеста)"
+    },
+    {
+      "id": null,
+      "source": "documents/D-003.pdf",
+      "row": null,
+      "original_source": "documents/D-003.docx",
+      "original_row": null,
+      "reason": "Тот же договор в другом формате (по реквизитам манифеста)"
+    },
+    {
+      "id": null,
+      "source": "documents/D-004.pdf",
+      "row": null,
+      "original_source": "documents/D-004.docx",
+      "original_row": null,
+      "reason": "Тот же договор в другом формате (по реквизитам манифеста)"
+    },
+    {
+      "id": null,
+      "source": "documents/ACT-001_copy.pdf",
+      "row": null,
+      "original_source": "documents/ACT-001.pdf",
+      "original_row": null,
+      "reason": "Точное совпадение содержимого файла (SHA-256)"
+    },
+    {
+      "id": null,
+      "source": "documents/ACT-002_copy.pdf",
+      "row": null,
+      "original_source": "documents/ACT-002.pdf",
+      "original_row": null,
+      "reason": "Точное совпадение содержимого файла (SHA-256)"
+    },
+    {
+      "id": null,
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": null,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": null,
+      "reason": "Точное совпадение содержимого файла (SHA-256)"
+    },
+    {
+      "id": null,
+      "source": "documents/plan_01_copy.xlsx",
+      "row": null,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": null,
+      "reason": "Точное совпадение содержимого файла (SHA-256)"
+    }
+  ],
+  "operations": [
+    {
+      "id": "T-RUB-1-004",
+      "source": "documents/bank_RUB_01-03.csv",
+      "row": 33,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 25,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-2-004",
+      "source": "documents/bank_RUB_04-07.xlsx",
+      "row": 33,
+      "original_source": "documents/bank_RUB_04-07.xlsx",
+      "original_row": 13,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-3-004",
+      "source": "documents/bank_RUB_08-10.csv",
+      "row": 33,
+      "original_source": "documents/bank_RUB_08-10.csv",
+      "original_row": 20,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-4-004",
+      "source": "documents/bank_RUB_11-14.xlsx",
+      "row": 33,
+      "original_source": "documents/bank_RUB_11-14.xlsx",
+      "original_row": 14,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-CHF-1-004",
+      "source": "documents/bank_CHF_01-03.csv",
+      "row": 33,
+      "original_source": "documents/bank_CHF_01-03.csv",
+      "original_row": 21,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-CHF-2-004",
+      "source": "documents/bank_CHF_04-07.xlsx",
+      "row": 33,
+      "original_source": "documents/bank_CHF_04-07.xlsx",
+      "original_row": 18,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-CHF-3-004",
+      "source": "documents/bank_CHF_08-10.csv",
+      "row": 33,
+      "original_source": "documents/bank_CHF_08-10.csv",
+      "original_row": 14,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-CHF-4-004",
+      "source": "documents/bank_CHF_11-14.xlsx",
+      "row": 33,
+      "original_source": "documents/bank_CHF_11-14.xlsx",
+      "original_row": 20,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-GBP-1-004",
+      "source": "documents/bank_GBP_01-03.csv",
+      "row": 33,
+      "original_source": "documents/bank_GBP_01-03.csv",
+      "original_row": 14,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-GBP-2-004",
+      "source": "documents/bank_GBP_04-07.xlsx",
+      "row": 33,
+      "original_source": "documents/bank_GBP_04-07.xlsx",
+      "original_row": 13,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-GBP-3-004",
+      "source": "documents/bank_GBP_08-10.csv",
+      "row": 33,
+      "original_source": "documents/bank_GBP_08-10.csv",
+      "original_row": 28,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-GBP-4-004",
+      "source": "documents/bank_GBP_11-14.xlsx",
+      "row": 33,
+      "original_source": "documents/bank_GBP_11-14.xlsx",
+      "original_row": 19,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-006",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 13,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 13,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-008",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 14,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 14,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-009",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 15,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 15,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-010",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 16,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 16,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-011",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 17,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 17,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-012",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 18,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 18,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-013",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 19,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 19,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-014",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 20,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 20,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-016",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 21,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 21,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-018",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 22,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 22,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-020",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 23,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 23,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-003",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 24,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 24,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-004",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 25,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 25,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-015",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 26,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 26,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-001",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 27,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 27,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-002",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 28,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 28,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-005",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 29,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 29,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-007",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 30,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 30,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-017",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 31,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 31,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-019",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 32,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 32,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "T-RUB-1-004",
+      "source": "documents/bank_RUB_01-03_copy.csv",
+      "row": 33,
+      "original_source": "documents/bank_RUB_01-03.csv",
+      "original_row": 25,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    }
+  ],
+  "plans": [
+    {
+      "id": "P-01-006",
+      "source": "documents/plan_01.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-02-006",
+      "source": "documents/plan_02.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_02.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-03-006",
+      "source": "documents/plan_03.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_03.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-04-006",
+      "source": "documents/plan_04.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_04.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-05-006",
+      "source": "documents/plan_05.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_05.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-06-006",
+      "source": "documents/plan_06.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_06.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-07-006",
+      "source": "documents/plan_07.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_07.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-08-006",
+      "source": "documents/plan_08.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_08.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-09-006",
+      "source": "documents/plan_09.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_09.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-10-006",
+      "source": "documents/plan_10.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_10.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-11-006",
+      "source": "documents/plan_11.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_11.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-12-006",
+      "source": "documents/plan_12.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_12.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-13-006",
+      "source": "documents/plan_13.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_13.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-14-006",
+      "source": "documents/plan_14.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_14.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-15-006",
+      "source": "documents/plan_15.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_15.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-16-006",
+      "source": "documents/plan_16.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_16.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-17-006",
+      "source": "documents/plan_17.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_17.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-18-006",
+      "source": "documents/plan_18.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_18.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-19-006",
+      "source": "documents/plan_19.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_19.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-20-006",
+      "source": "documents/plan_20.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_20.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-001",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 5,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 5,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-002",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 6,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 6,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-003",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 7,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 7,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-004",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 8,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 8,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-005",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 9,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 9,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-006",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 10,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-007",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 11,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 11,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-008",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 12,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 12,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-009",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 13,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 13,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-010",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 14,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 14,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-011",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 15,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 15,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-012",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 16,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 16,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-013",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 17,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 17,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-014",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 18,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 18,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-015",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 19,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 19,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-016",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 20,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 20,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-017",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 21,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 21,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-018",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 22,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 22,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-019",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 23,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 23,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-020",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 24,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 24,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    },
+    {
+      "id": "P-01-006",
+      "source": "documents/plan_01_copy.xlsx",
+      "row": 25,
+      "original_source": "documents/plan_01.xlsx",
+      "original_row": 10,
+      "reason": "Совпадает стабильный ID и финансовые поля"
+    }
+  ],
+  "conflicts": [],
+  "summary": {
+    "files": 100,
+    "duplicate_files": 8,
+    "bank_rows": 273,
+    "unique_bank_operations": 240,
+    "duplicate_bank_rows": 33,
+    "plan_rows": 441,
+    "unique_plans": 400,
+    "duplicate_plan_rows": 41,
+    "conflicts": 0
+  }
+}

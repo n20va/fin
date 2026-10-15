@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ФинПлан": {
+      "commandName": "Project",
+      "commandLineArgs": "--open"
+    }
+  }
+}
