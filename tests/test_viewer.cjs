@@ -6,7 +6,9 @@ const vm = require('node:vm');
 const path = require('node:path');
 
 function viewer(hash = '', runtime = null, fetchImpl = async()=>{throw Error('Unexpected fetch')}) {
-  const html = fs.readFileSync(path.join(__dirname, '../output/calendar_view.html'), 'utf8');
+  const html = fs.readFileSync(path.join(__dirname, '../demo/viewer.html'), 'utf8')
+    .replace('__DATA__', fs.readFileSync(path.join(__dirname, '../output/dataset.json'), 'utf8').replace(/</g, '\\u003c'))
+    .replace('__FINANCE__', fs.readFileSync(path.join(__dirname, '../demo/finance.js'), 'utf8'));
   const scripts = [...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)];
   const nodes = new Map();
   const node = (id, extra = {}) => {
@@ -99,27 +101,18 @@ test('Currency curves are dashed, converted to the selected scale and finite on 
 });
 
 
-test('Regenerate button waits for C# generation and opens the completed snapshot', async () => {
-  let finish;
-  const app=viewer('',{regenerateUrl:'/api/regenerate',token:'test-token'},async(url,options)=>{
-    assert.equal(url,'/api/regenerate');assert.equal(options.method,'POST');assert.equal(options.headers['X-FinPlan-Token'],'test-token');
-    return await new Promise(resolve=>{finish=resolve});
-  });
-  const task=app.run("document.getElementById('regenerate-data').onclick()");
-  assert.equal(app.nodes.get('regenerate-data').disabled,true);
-  finish({ok:true,json:async()=>({url:'/datasets/new/calendar_view.html#/home'})});
-  await task;
-  assert.equal(app.target(),'/datasets/new/calendar_view.html#/home');
+test('Home offers the generator section without a separate regeneration button', () => {
+  const app = viewer();
+  assert.equal(app.nodes.has('regenerate-data'), false);
+  assert.equal(app.nodes.has('generation-status'), false);
+  assert.ok(app.nodes.get('quick-links').innerHTML.includes('#/generation'));
+  app.run("navigate('generation')");
+  assert.equal(app.nodes.get('page-title').textContent, 'Генератор данных');
 });
 
-test('Generation errors preserve the page and restore the button; offline mode explains launch', async () => {
-  const app=viewer('',{regenerateUrl:'/api/regenerate',token:'test-token'},async()=>({ok:false,json:async()=>({error:'Test generation failure'})}));
-  const initial=app.run('D.seed');
-  await app.run("document.getElementById('regenerate-data').onclick()");
-  assert.equal(app.nodes.get('regenerate-data').disabled,false);
-  assert.equal(app.nodes.get('generation-status').textContent,'Test generation failure');
-  assert.equal(app.run('D.seed'),initial);assert.equal(app.target(),null);
-  const offline=viewer();
-  await offline.run("document.getElementById('regenerate-data').onclick()");
-  assert.ok(offline.nodes.get('generation-status').textContent.includes('Rider'));
+test('Large corpus money keeps every minor unit in the displayed amount', () => {
+  const app = viewer();
+  const text = app.run("fmt('4268913566232593.56','RUB')");
+  assert.match(text, /593,56/);
+  assert.match(app.run("fmt('-0.01','CHF')"), /-0,01/);
 });

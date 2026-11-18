@@ -29,6 +29,9 @@ public sealed class Obligation
     public string? Contract { get; set; }
     public string? Invoice { get; set; }
     public string? Act { get; set; }
+    public string? ContractId { get; set; }
+    public string? InvoiceId { get; set; }
+    public string? ActId { get; set; }
     public string CounterpartyId { get; set; } = "";
     public string Counterparty { get; set; } = "";
     public string Currency { get; set; } = "";
@@ -55,6 +58,7 @@ public sealed record Operation(string Id, DateOnly Date, string Account, string 
 }
 public sealed class Document
 {
+    public FinancialDocument? Extraction { get; set; }
     public string Path { get; set; } = "";
     public string Type { get; set; } = "";
     public List<string> Obligations { get; set; } = [];
@@ -85,6 +89,9 @@ public sealed class DuplicateReport
 public sealed record Reports(DateOnly Start, DateOnly EndExclusive, Dictionary<string, Dictionary<string, decimal>> Currencies);
 public sealed class Dataset
 {
+    public CorpusSummary? Corpus { get; set; }
+    public IngestionSummary? Ingestion { get; set; }
+    public VolumeSummary? Volume { get; set; }
     public int Version { get; set; } = 6;
     public int Seed { get; set; }
     public string Company { get; set; } = "ООО «Демо Финансы» (вымышленная)";
