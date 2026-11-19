@@ -40,7 +40,7 @@ public sealed class DemoStore
         CleanupWarning = RemovePreviousDatasets();
     }
 
-    public async Task<DemoSnapshot> RegenerateAsync(int? seed = null, long? targetBytes = null, Action<GenerationProgress>? progress = null, CancellationToken cancellation = default)
+    public async Task<DemoSnapshot> RegenerateAsync(int? seed = null, long? targetBytes = null, Action<GenerationProgress>? progress = null, CancellationToken cancellation = default, GenerationPeriod? period = null)
     {
         if (!await gate.WaitAsync(0)) throw new GenerationBusyException();
         var directory = Path.Combine(output, "generations", Guid.NewGuid().ToString("N"));
@@ -57,7 +57,7 @@ public sealed class DemoStore
             cancellation.ThrowIfCancellationRequested();
             var nextSeed = seed ?? RandomNumberGenerator.GetInt32(1, int.MaxValue);
             while (seed is null && nextSeed == Current.Data.Seed) nextSeed = RandomNumberGenerator.GetInt32(1, int.MaxValue);
-            var data = await Task.Run(() => generate(directory, nextSeed));
+            var data = await Task.Run(() => period is null ? generate(directory, nextSeed) : generator.Generate(directory, nextSeed, period));
             if (targetBytes is not null)
             {
                 await Task.Run(() =>

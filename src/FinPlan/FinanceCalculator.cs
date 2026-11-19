@@ -34,8 +34,9 @@ public static class FinanceCalculator
             o.Expected = o.ScheduledDate < data.Cutoff ? data.Cutoff : o.ScheduledDate;
         }
         data.Calendar.Clear();
-        for (var day = data.Cutoff; day <= data.End; day = day.AddDays(1))
+        for (var offset = data.Cutoff.DayNumber; offset <= data.End.DayNumber; offset++)
         {
+            var day = DateOnly.FromDayNumber(offset);
             var rows = new Dictionary<string, Balance>();
             foreach (var c in data.Rates.Keys)
             {

@@ -4,9 +4,18 @@ namespace FinPlan;
 
 public sealed class DemoGenerator(string root)
 {
-    public static Dataset Build(int seed)
+    public static Dataset Build(int seed, GenerationPeriod? period = null)
     {
-        var data = new Dataset { Seed = seed, End = new(2026, 12, 31) };
+        var data = new Dataset { Seed = seed };
+        if (period is not null)
+        {
+            data.OpeningDate = period.Start;
+            data.End = period.End;
+            data.Cutoff = period.Start.AddDays(Math.Max(1, (period.End.DayNumber - period.Start.DayNumber) * 14 / 91));
+            data.RatesDate = data.Cutoff;
+        }
+        var last = data.End.DayNumber - data.OpeningDate.DayNumber;
+        DateOnly Day(int offset) => data.OpeningDate.AddDays(offset);
         string[] names = ["Северный Контур", "Вектор Снабжение", "Маяк Сервис", "Альта Проект", "Линия Ресурс", "Точка Логистик", "Спектр Материал", "Ритм Технологии", "Орион Комплект", "Грань Консалт", "Атлас Поставка", "Нева Инжиниринг", "Фокус Медиа", "Парус Торг", "Кедр Системы", "Меридиан Строй", "Сфера Дизайн", "Исток Склад", "Оптима Транспорт", "Горизонт Связь"];
         data.Counterparties = names.Select((name, i) => new Counterparty($"CP-{i + 1:000}", $"ООО «{name} Демо»", $"DEMO-REG-{i + 1:000}")).ToList();
         var currencies = data.Rates.Keys.ToArray();
@@ -23,13 +32,11 @@ public sealed class DemoGenerator(string root)
         {
             var cp = data.Counterparties[i]; var c = currencies[i % 3];
             var direction = i < 6 ? "out" : i < 9 ? "in" : Next(0, 99) < 48 ? "in" : "out";
-            var recognized = i < 6 ? new DateOnly(2026, 10, Next(2, 5)) : data.OpeningDate.AddDays(Next(2, 73));
+            var recognized = (i < 6 ? Next(1, 4) : Next(2, 73)) * last / 91;
             var terms = i < 6 ? Next(1, 5) : new[] { 0, 3, 7, 14, 21, 30, 45 }[Next(0, 6)];
-            var due = recognized.AddDays(terms);
-            if (due >= data.End) due = data.End.AddDays(-1);
-            var scheduled = due.AddDays(Next(0, 99) < 30 ? Next(-2, 9) : 0);
-            if (scheduled >= data.End) scheduled = data.End.AddDays(-1);
-            data.Obligations.Add(new() { Id = $"O-{i + 1:000}", Contract = $"D-{i + 1:000}", Invoice = $"S-{i + 1:000}", Act = $"ACT-{i + 1:000}", CounterpartyId = cp.Id, Counterparty = cp.Name, Currency = c, Account = "A-" + c, Direction = direction, Amount = Amount(c, true), Due = due, ScheduledDate = scheduled, Expected = scheduled < data.Cutoff ? data.Cutoff : scheduled, RecognizedDate = recognized, PnlCategory = direction == "in" ? "revenue" : i % 3 == 0 ? "operating_expenses" : "cost_of_sales" });
+            var due = Math.Min(recognized + terms, last - 1);
+            var scheduled = Day(Math.Clamp(due + (Next(0, 99) < 30 ? Next(-2, 9) : 0), 0, last - 1));
+            data.Obligations.Add(new() { Id = $"O-{i + 1:000}", Contract = $"D-{i + 1:000}", Invoice = $"S-{i + 1:000}", Act = $"ACT-{i + 1:000}", CounterpartyId = cp.Id, Counterparty = cp.Name, Currency = c, Account = "A-" + c, Direction = direction, Amount = Amount(c, true), Due = Day(due), ScheduledDate = scheduled, Expected = scheduled < data.Cutoff ? data.Cutoff : scheduled, RecognizedDate = Day(recognized), PnlCategory = direction == "in" ? "revenue" : i % 3 == 0 ? "operating_expenses" : "cost_of_sales" });
         }
         (int First, int Last)[] periods = [(1, 3), (4, 7), (8, 10), (11, 14)];
         var payments = new Dictionary<(string Currency, int Period, int Slot), (Obligation Obligation, decimal Amount, DateOnly Date)>();
@@ -42,10 +49,11 @@ public sealed class DemoGenerator(string root)
             var parts = percent < 100 && i % 2 == 0 ? new[] { FinanceCalculator.Money(total * .4m), total - FinanceCalculator.Money(total * .4m) } : new[] { total };
             foreach (var part in parts)
             {
-                var date = new DateOnly(2026, 10, Next(2, 14));
-                var period = Array.FindIndex(periods, p => p.First <= date.Day && date.Day <= p.Last);
-                var slot = Enumerable.Range(0, 20).First(j => !payments.ContainsKey((o.Currency, period, j)));
-                payments[(o.Currency, period, slot)] = (o, part, date);
+                var bankDay = Next(2, 14);
+                var register = Array.FindIndex(periods, p => p.First <= bankDay && bankDay <= p.Last);
+                var date = BankDate(data, bankDay);
+                var slot = Enumerable.Range(0, 20).First(j => !payments.ContainsKey((o.Currency, register, j)));
+                payments[(o.Currency, register, slot)] = (o, part, date);
             }
         }
         var descriptions = new Dictionary<string, string> { ["customer_receipts"] = "Аванс от покупателя", ["supplier_payments"] = "Аванс поставщику", ["operating_payments"] = "Аванс за текущие услуги", ["equipment_purchase"] = "Приобретение оборудования", ["loan_received"] = "Получение займа, основной долг", ["loan_repaid"] = "Погашение займа, основной долг" };
@@ -56,7 +64,7 @@ public sealed class DemoGenerator(string root)
             var c = currencies[ci]; var cp = data.Counterparties[Next(0, 19)];
             var direction = Next(0, 99) < 48 ? "in" : "out";
             var amount = Amount(c); string? obligation = null;
-            var date = new DateOnly(2026, 10, Next(periods[pi].First, periods[pi].Last));
+            var date = BankDate(data, Next(periods[pi].First, periods[pi].Last));
             string[] incoming = ["customer_receipts", "loan_received"], outgoing = ["supplier_payments", "operating_payments", "equipment_purchase", "loan_repaid"];
             var category = direction == "in" ? incoming[Next(0, 99) < 85 ? 0 : 1] : outgoing[Next(0, 3)];
             var purpose = $"{descriptions[category]}; реестр {pi + 1}/{j + 1}";
@@ -86,21 +94,28 @@ public sealed class DemoGenerator(string root)
         for (var j = 0; j < 20; j++)
         {
             var cp = data.Counterparties[Next(0, 19)]; var c = currencies[Next(0, 2)]; var direction = Next(0, 99) < 48 ? "in" : "out";
-            var due = data.Cutoff.AddDays(Next(0, data.End.DayNumber - data.Cutoff.DayNumber - 1));
-            var scheduled = due.AddDays(Next(0, 99) < 25 ? Next(-3, 12) : 0);
-            if (scheduled < data.Cutoff) scheduled = data.Cutoff;
-            if (scheduled >= data.End) scheduled = data.End.AddDays(-1);
+            var cutoff = data.Cutoff.DayNumber - data.OpeningDate.DayNumber;
+            var lastPlanDay = Math.Max(cutoff, last - 1);
+            var due = Next(cutoff, lastPlanDay);
+            var scheduled = Day(Math.Clamp(due + (Next(0, 99) < 25 ? Next(-3, 12) : 0), cutoff, lastPlanDay));
             var purposes = direction == "in" ? incomingPlans : outgoingPlans;
-            data.Obligations.Add(new() { Id = $"P-{bi + 1:00}-{j + 1:000}", CounterpartyId = cp.Id, Counterparty = cp.Name, Currency = c, Account = "A-" + c, Direction = direction, Amount = Amount(c), Due = due, Expected = scheduled, ScheduledDate = scheduled, Purpose = $"{purposes[Next(0, purposes.Length - 1)]}, пакет {bi + 1}, позиция {j + 1}", Kind = "manual_plan" });
+            data.Obligations.Add(new() { Id = $"P-{bi + 1:00}-{j + 1:000}", CounterpartyId = cp.Id, Counterparty = cp.Name, Currency = c, Account = "A-" + c, Direction = direction, Amount = Amount(c), Due = Day(due), Expected = scheduled, ScheduledDate = scheduled, Purpose = $"{purposes[Next(0, purposes.Length - 1)]}, пакет {bi + 1}, позиция {j + 1}", Kind = "manual_plan" });
         }
         data.Accruals = data.Obligations.Take(20).Select(o => new Accrual("ACCR-" + o.Act, o.RecognizedDate!.Value, o.PnlCategory!, o.Amount, o.Currency, o.Counterparty, o.Id, "documents/" + o.Act + ".pdf")).ToList();
         return data;
     }
-    public Dataset Generate(string output, int seed)
+    private static DateOnly BankDate(Dataset data, int nominalDay) =>
+        data.OpeningDate.AddDays((nominalDay - 1) * (data.Cutoff.DayNumber - data.OpeningDate.DayNumber - 1) / 13);
+
+    public Dataset Generate(string output, int seed) => Generate(output, seed, null);
+
+    public Dataset Generate(string output, int seed, GenerationPeriod? period)
     {
         var docs = Path.Combine(output, "documents"); Directory.CreateDirectory(docs);
         if (Directory.EnumerateFileSystemEntries(docs).Any()) throw new InvalidOperationException("Папка documents не пуста. Выберите новую папку --output.");
-        var data = Build(seed);
+        var data = Build(seed, period);
+        var contractDate = Date(data.OpeningDate);
+        var invoiceDay = data.OpeningDate.AddDays(1);
         string Register(string name, string type, IEnumerable<string> ids, List<string>? key = null)
         {
             var path = "documents/" + name; var list = ids.Distinct().ToList();
@@ -110,20 +125,25 @@ public sealed class DemoGenerator(string root)
         }
         foreach (var o in data.Obligations.Take(20))
         {
-            string[] lines = [data.Company, "СИНТЕТИЧЕСКИЙ ОБРАЗЕЦ • НЕ ДЛЯ ОПЛАТЫ", $"Обязательство ID: {o.Id}", $"Ожидаемая дата: {Date(o.ScheduledDate)}", $"Контрагент: {o.Counterparty}", $"Регистрационный код: {o.CounterpartyId} (учебный)", $"Договор: {o.Contract} от 2026-10-01", $"Счёт на оплату: {o.Invoice} от 2026-10-02", $"Валютный счёт компании: {o.Account}", $"Направление: {(o.Direction == "out" ? "выплата" : "поступление")}", $"Сумма: {Number(o.Amount)} {o.Currency}", $"Оплатить не позднее: {Date(o.Due)}"];
-            Docx(Register(o.Contract + ".docx", "contract", [o.Id], ["contract", o.CounterpartyId, o.Contract!, "2026-10-01"]), new[] { "ДОГОВОР ОКАЗАНИЯ УСЛУГ" }.Concat(lines).Concat(["1. Предмет: оказание услуг, потребляемых в текущем периоде.", "2. Цена фиксирована в указанной валюте, НДС не облагается (учебное допущение).", $"3. Срок оплаты — {o.Due.DayNumber - o.RecognizedDate!.Value.DayNumber} календарных дней после акта; частичная оплата допускается.", "4. Исполнение подтверждается актом, связанным с тем же счётом.", "Заказчик: __________________    Исполнитель: __________________"]));
-            Xlsx(Register(o.Invoice + ".xlsx", "invoice", [o.Id]), [["СЧЁТ НА ОПЛАТУ", o.Invoice!], ["Дата", "2026-10-02"], ["Обязательство ID", o.Id], ["Ожидаемая дата", Date(o.ScheduledDate)], ["Компания", data.Company], ["Контрагент", o.Counterparty], ["Контрагент ID", o.CounterpartyId], ["Договор", o.Contract!], ["Валюта", o.Currency], ["Счёт компании", o.Account], ["Срок оплаты", Date(o.Due)], ["Направление", o.Direction], ["№", "Наименование", "Ед.", "Количество", "Цена", "Сумма"], ["1", "Оказанные и потреблённые услуги", "усл.", "1", Number(o.Amount), Number(o.Amount)], ["ИТОГО", Number(o.Amount)], ["НДС", "Без НДС, учебный образец"], ["Подпись", "________________"]]);
+            var invoiceDate = Date(o.RecognizedDate < invoiceDay ? data.OpeningDate : invoiceDay);
+            string[] lines = [data.Company, "СИНТЕТИЧЕСКИЙ ОБРАЗЕЦ • НЕ ДЛЯ ОПЛАТЫ", $"Обязательство ID: {o.Id}", $"Ожидаемая дата: {Date(o.ScheduledDate)}", $"Контрагент: {o.Counterparty}", $"Регистрационный код: {o.CounterpartyId} (учебный)", $"Договор: {o.Contract} от {contractDate}", $"Счёт на оплату: {o.Invoice} от {invoiceDate}", $"Валютный счёт компании: {o.Account}", $"Направление: {(o.Direction == "out" ? "выплата" : "поступление")}", $"Сумма: {Number(o.Amount)} {o.Currency}", $"Оплатить не позднее: {Date(o.Due)}"];
+            Docx(Register(o.Contract + ".docx", "contract", [o.Id], ["contract", o.CounterpartyId, o.Contract!, contractDate]), new[] { "ДОГОВОР ОКАЗАНИЯ УСЛУГ" }.Concat(lines).Concat(["1. Предмет: оказание услуг, потребляемых в текущем периоде.", "2. Цена фиксирована в указанной валюте, НДС не облагается (учебное допущение).", $"3. Срок оплаты — {o.Due.DayNumber - o.RecognizedDate!.Value.DayNumber} календарных дней после акта; частичная оплата допускается.", "4. Исполнение подтверждается актом, связанным с тем же счётом.", "Заказчик: __________________    Исполнитель: __________________"]));
+            Xlsx(Register(o.Invoice + ".xlsx", "invoice", [o.Id]), [["СЧЁТ НА ОПЛАТУ", o.Invoice!], ["Дата", invoiceDate], ["Обязательство ID", o.Id], ["Ожидаемая дата", Date(o.ScheduledDate)], ["Компания", data.Company], ["Контрагент", o.Counterparty], ["Контрагент ID", o.CounterpartyId], ["Договор", o.Contract!], ["Валюта", o.Currency], ["Счёт компании", o.Account], ["Срок оплаты", Date(o.Due)], ["Направление", o.Direction], ["№", "Наименование", "Ед.", "Количество", "Цена", "Сумма"], ["1", "Оказанные и потреблённые услуги", "усл.", "1", Number(o.Amount), Number(o.Amount)], ["ИТОГО", Number(o.Amount)], ["НДС", "Без НДС, учебный образец"], ["Подпись", "________________"]]);
             Pdf(Register(o.Act + ".pdf", "act", [o.Id]), new[] { $"АКТ СДАЧИ-ПРИЁМКИ {o.Act} от {Date(o.RecognizedDate!.Value)}" }.Concat(lines).Concat([$"Статья ОПиУ: {FinanceCalculator.PnlCategories[o.PnlCategory!]}", "Услуги оказаны и потреблены в дату акта.", "Позиция 1. Оказанные и потреблённые услуги — 1 усл.", $"Итого: {Number(o.Amount)} {o.Currency}. Без НДС.", "Работы выполнены. Претензий по объёму нет.", "Акт подтверждает исполнение; не создаёт дополнительный платёж.", "Сдал: __________________       Принял: __________________"]));
         }
         foreach (var o in data.Obligations.Take(4))
-            Pdf(Register(o.Contract + ".pdf", "contract_alternative", [o.Id], ["contract", o.CounterpartyId, o.Contract!, "2026-10-01"]), ["ДОГОВОР — альтернативное представление", data.Company, $"Договор: {o.Contract} от 2026-10-01", $"Обязательство ID: {o.Id}", $"Ожидаемая дата: {Date(o.ScheduledDate)}", $"Контрагент: {o.Counterparty}", $"Контрагент ID: {o.CounterpartyId}", $"Сумма: {Number(o.Amount)} {o.Currency}", $"Оплатить не позднее: {Date(o.Due)}", $"Направление: {o.Direction}", "СИНТЕТИЧЕСКИЙ ОБРАЗЕЦ", "Тот же договор, что в DOCX. Не новое обязательство."]);
+            Pdf(Register(o.Contract + ".pdf", "contract_alternative", [o.Id], ["contract", o.CounterpartyId, o.Contract!, contractDate]), ["ДОГОВОР — альтернативное представление", data.Company, $"Договор: {o.Contract} от {contractDate}", $"Обязательство ID: {o.Id}", $"Ожидаемая дата: {Date(o.ScheduledDate)}", $"Контрагент: {o.Counterparty}", $"Контрагент ID: {o.CounterpartyId}", $"Сумма: {Number(o.Amount)} {o.Currency}", $"Оплатить не позднее: {Date(o.Due)}", $"Направление: {o.Direction}", "СИНТЕТИЧЕСКИЙ ОБРАЗЕЦ", "Тот же договор, что в DOCX. Не новое обязательство."]);
         (int First, int Last)[] periods = [(1, 3), (4, 7), (8, 10), (11, 14)];
-        foreach (var c in data.Rates.Keys)
-        for (var pi = 0; pi < 4; pi++)
+        var currencies = data.Rates.Keys.ToArray();
+        for (var ci = 0; ci < currencies.Length; ci++)
+        for (var pi = 0; pi < periods.Length; pi++)
         {
-            var (first, last) = periods[pi]; var firstDate = new DateOnly(2026, 10, first); var lastDate = new DateOnly(2026, 10, last);
-            var original = data.Operations.Where(t => t.Currency == c && firstDate <= t.Date && t.Date <= lastDate).ToList();
-            var opening = data.Accounts.First(a => a.Currency == c).Opening + data.Operations.Where(t => t.Currency == c && t.Date < firstDate).Sum(t => t.Direction == "in" ? t.Amount : -t.Amount);
+            var (first, last) = periods[pi]; var firstDate = BankDate(data, first); var lastDate = BankDate(data, last);
+            var c = currencies[ci];
+            var accountStart = ci * periods.Length * 20;
+            var original = data.Operations.Skip(accountStart + pi * 20).Take(20).ToList();
+            var opening = data.Accounts.First(a => a.Currency == c).Opening + data.Operations.Where(t => t.Currency == c && t.Date < firstDate)
+                .Sum(t => t.Direction == "in" ? t.Amount : -t.Amount);
             var incoming = original.Where(t => t.Direction == "in").Sum(t => t.Amount); var outgoing = original.Where(t => t.Direction == "out").Sum(t => t.Amount);
             List<string[]> rows = [["БАНКОВСКАЯ ВЫПИСКА — УЧЕБНЫЙ ОБРАЗЕЦ"], ["Банк", "ДЕМО-БАНК (вымышленный)"], ["Компания", data.Company], ["Счёт", "A-" + c], ["Валюта", c], ["Период", Date(firstDate), Date(lastDate)], ["Входящий остаток", Number(opening)], ["Оборот по поступлениям", Number(incoming)], ["Оборот по списаниям", Number(outgoing)], ["Исходящий остаток", Number(opening + incoming - outgoing)], ["Примечание", "Добавлен повтор строки для проверки импорта; контрольные итоги без повтора"], DuplicateChecker.BankHeader];
             var items = original.OrderBy(t => t.Date).ThenBy(t => t.Id).Append(original[3]).ToList();

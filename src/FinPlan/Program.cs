@@ -4,6 +4,7 @@ using FinPlan;
 
 var root = FindRoot();
 var output = Path.Combine(root, "output", "runtime"); var seed = 42; var generate = false; var check = false; var open = true;
+string? start = null, end = null;
 try
 {
     for (var i = 0; i < args.Length; i++)
@@ -13,12 +14,16 @@ try
             case "--generate": generate = true; break;
             case "--output": output = Path.GetFullPath(args[++i]); break;
             case "--seed": seed = int.Parse(args[++i]); break;
+            case "--start": start = args[++i]; break;
+            case "--end": end = args[++i]; break;
             case "--check": check = true; open = false; break;
             case "--no-browser": open = false; break;
             case "--open": open = true; break;
             default: throw new ArgumentException("Неизвестный аргумент: " + args[i]);
         }
     }
+    var period = GenerationPeriod.Parse(start, end);
+    if (period is not null && !generate) throw new ArgumentException("Даты --start и --end доступны в режиме --generate.");
     if (!generate && !check)
     {
         await DemoHost.RunAsync(root, output, open);
@@ -28,7 +33,7 @@ try
     var generator = new DemoGenerator(root);
     if (generate || !File.Exists(Path.Combine(output, "dataset.json")))
     {
-        var result = generator.Generate(output, seed);
+        var result = generator.Generate(output, seed, period);
         Console.WriteLine($"Создано {result.Documents.Count} документов, {result.Counterparties.Count} контрагентов, {result.Obligations.Count} обязательств/планов.");
     }
     else

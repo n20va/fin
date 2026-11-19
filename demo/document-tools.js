@@ -66,14 +66,131 @@
       if (['replace', 'add', 'remove'].includes(saved.operation)) byId('volume-operation').value = saved.operation;
     }
   } catch {}
+  const startDate = byId('volume-start'), endDate = byId('volume-end');
+  const isoDate = (year, month, day) => [String(year).padStart(4, '0'), String(month).padStart(2, '0'), String(day).padStart(2, '0')].join('-');
+  function daysInMonth(year, month) {
+    if (month === 2) return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 29 : 28;
+    return [4, 6, 9, 11].includes(month) ? 30 : 31;
+  }
+  function periodLimit(start) {
+    const [year, month, day] = start.split('-').map(Number);
+    return year > 9996 ? '9999-12-31' : isoDate(year + 3, month, Math.min(day, daysInMonth(year + 3, month)));
+  }
+  function updatePeriod() {
+    endDate.min = new Date(Date.parse(startDate.value) + 86400000).toISOString().slice(0, 10);
+    endDate.max = periodLimit(startDate.value);
+    endDate.value = endDate.value < endDate.min ? endDate.min : endDate.value > endDate.max ? endDate.max : endDate.value;
+  }
+  startDate.min = '0001-01-01';
+  startDate.max = '9999-12-30';
+  startDate.value = BASE.opening_date;
+  endDate.value = BASE.end;
+  startDate.onchange = () => {
+    if (startDate.value < startDate.min || startDate.value > startDate.max) return;
+    updatePeriod();
+    window.syncFinplanDates?.();
+  };
+  updatePeriod();
+
+  function decorateDate(input) {
+    const picker = document.createElement('span');
+    picker.className = 'date-picker';
+    picker.innerHTML = `<button type="button" class="date-trigger" aria-expanded="false" aria-controls="${input.id}-picker"><span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v5m10-5v5M3 10h18"/></svg></button>
+      <span class="date-panel" id="${input.id}-picker" role="group" aria-label="${input.dataset.calendarLabel}" hidden>
+        <span class="date-nav"><button type="button" aria-label="Предыдущий месяц">‹</button><select aria-label="Месяц"></select><input type="number" inputmode="numeric" aria-label="Год"><button type="button" aria-label="Следующий месяц">›</button></span>
+        <span class="date-grid"></span>
+      </span>`;
+    input.after(picker);
+    input.hidden = true;
+    const trigger = picker.querySelector('.date-trigger'), panel = picker.querySelector('.date-panel');
+    const [prev, next] = panel.querySelectorAll('button');
+    const monthSelect = panel.querySelector('select'), yearInput = panel.querySelector('input'), grid = panel.querySelector('.date-grid');
+    const months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+    const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map(day => `<span class="date-weekday">${day}</span>`).join('');
+    const today = new Date();
+    const todayIso = isoDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
+    let year, month;
+    const sync = () => {
+      const label = input.value.split('-').reverse().join('.');
+      trigger.firstElementChild.textContent = label;
+      trigger.setAttribute('aria-label', input.dataset.calendarLabel + ', ' + label);
+    };
+    function close(focus = false) {
+      panel.hidden = true;
+      trigger.setAttribute('aria-expanded', 'false');
+      if (focus) trigger.focus();
+    }
+    function renderMonth() {
+      const min = input.min.slice(0, 7), max = input.max.slice(0, 7);
+      const currentMonth = isoDate(year, month, 1).slice(0, 7);
+      monthSelect.innerHTML = months.map((name, i) => {
+        const key = isoDate(year, i + 1, 1).slice(0, 7);
+        return `<option value="${i + 1}" ${key < min || key > max ? 'disabled' : ''}>${name}</option>`;
+      }).join('');
+      monthSelect.value = month;
+      yearInput.min = min.slice(0, 4);
+      yearInput.max = max.slice(0, 4);
+      yearInput.value = year;
+      prev.disabled = currentMonth <= min;
+      next.disabled = currentMonth >= max;
+      const first = new Date(isoDate(year, month, 1)).getUTCDay();
+      grid.innerHTML = weekdays + '<span class="date-empty" aria-hidden="true"></span>'.repeat((first + 6) % 7) +
+        Array.from({length: daysInMonth(year, month)}, (_, i) => {
+          const date = isoDate(year, month, i + 1);
+          return `<button type="button" class="date-day" data-picker-date="${date}" aria-label="${i + 1} · ${months[month - 1]} · ${year}" aria-pressed="${date === input.value}" ${date === todayIso ? 'aria-current="date"' : ''} ${date < input.min || date > input.max ? 'disabled' : ''}>${i + 1}</button>`;
+        }).join('');
+    }
+    function showMonth(nextYear, nextMonth) {
+      const first = isoDate(nextYear, nextMonth, 1).slice(0, 7);
+      const visible = first < input.min.slice(0, 7) ? input.min : first > input.max.slice(0, 7) ? input.max : first;
+      [year, month] = visible.split('-').map(Number);
+      renderMonth();
+    }
+    prev.onclick = () => showMonth(month === 1 ? year - 1 : year, month === 1 ? 12 : month - 1);
+    next.onclick = () => showMonth(month === 12 ? year + 1 : year, month === 12 ? 1 : month + 1);
+    monthSelect.onchange = () => showMonth(year, Number(monthSelect.value));
+    yearInput.onchange = () => showMonth(Math.max(Number(yearInput.min), Math.min(Number(yearInput.max), Number(yearInput.value) || year)), month);
+    yearInput.onkeydown = event => {
+      if (event.key === 'Enter') { event.preventDefault(); yearInput.blur(); }
+    };
+    trigger.onclick = () => {
+      if (!panel.hidden) return close(true);
+      const [selectedYear, selectedMonth] = input.value.split('-').map(Number);
+      showMonth(selectedYear, selectedMonth);
+      panel.hidden = false;
+      trigger.setAttribute('aria-expanded', 'true');
+      panel.style.left = '0px';
+      panel.style.left = Math.min(0, window.innerWidth - panel.getBoundingClientRect().right - 12) + 'px';
+      (grid.querySelector('[aria-pressed="true"]') || monthSelect).focus();
+    };
+    grid.onclick = event => {
+      const button = event.target.closest('button[data-picker-date]');
+      if (!button || button.disabled) return;
+      input.value = button.dataset.pickerDate;
+      input.dispatchEvent(new Event('change', {bubbles: true}));
+      sync();
+      close(true);
+    };
+    picker.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !panel.hidden) close(true);
+    });
+    document.addEventListener('pointerdown', event => { if (!picker.contains(event.target)) close(); });
+    sync();
+    return sync;
+  }
+  if (typeof document.createElement === 'function' && typeof startDate.after === 'function') {
+    const pickers = [byId('asof'), byId('forecast-end'), startDate, endDate].map(decorateDate);
+    window.syncFinplanDates = () => pickers.forEach(sync => sync());
+  }
   byId('volume-target').onchange = saveTarget; byId('volume-unit').onchange = saveTarget;
   function updateOperation() {
     const action = byId('volume-operation').value || 'replace';
+    byId('volume-period').hidden = action !== 'replace';
     byId('volume-label').textContent = action === 'replace' ? 'Целевой объём' : action === 'add' ? 'Добавить объём' : 'Удалить объём';
-    byId('volume-submit').textContent = action === 'replace' ? 'Сгенерировать и заменить' : action === 'add' ? 'Догенерировать данные' : 'Уменьшить датасет';
-    byId('volume-action-help').textContent = action === 'replace' ? 'Создать другой набор заданного суммарного размера. Нужно свободное место на весь новый объём и ещё 5 ГБ.'
-      : action === 'add' ? 'Добавить указанный объём к текущему набору. Существующие записи сохраняются, новые получают уникальные номера. Нужно свободное место на добавляемый объём и ещё 5 ГБ.'
-      : 'Удалить примерно указанный объём из конца корпуса целыми связанными частями. Отклонение до 100 МБ. Контрольные документы, справочник контрагентов и календарь сохраняются.';
+    byId('volume-submit').textContent = action === 'replace' ? 'Сгенерировать и заменить' : action === 'add' ? 'Догенерировать данные' : 'Удалить часть данных';
+    byId('volume-action-help').textContent = action === 'replace' ? 'Нужно свободное место на новый набор и ещё 5 ГБ. После генерации новый набор заменит открытый.'
+      : action === 'add' ? 'Существующие записи сохраняются. Нужно свободное место на добавляемый объём и ещё 5 ГБ.'
+      : 'Данные удаляются с конца набора целыми группами связанных записей. Контрольные документы, справочник контрагентов и календарь сохраняются.';
     saveTarget();
   }
   byId('volume-operation').onchange = updateOperation; updateOperation();
@@ -99,7 +216,7 @@
       const data = await response.json();
       if (!Number.isSafeInteger(data.total_bytes) || !Number.isSafeInteger(data.files)) throw Error('Не удалось получить размер файлов. Повторите попытку.');
       value.textContent = bytes(data.total_bytes);
-      details.textContent = `${Number(data.files).toLocaleString('ru-RU')} файлов на диске: документы, таблицы и файлы календаря открытого набора.`;
+      details.textContent = `${Number(data.files).toLocaleString('ru-RU')} файлов в открытом наборе.`;
       if (Number.isSafeInteger(data.removable_bytes)) details.textContent += ` Из корпуса можно удалить до ${bytes(Math.floor(data.removable_bytes / 1000000) * 1000000)}.`;
       if (data.cleanup_warning) details.textContent += ' ' + data.cleanup_warning;
       showChange(data.total_bytes, data.last_change);
@@ -121,7 +238,7 @@
     const cancel = byId(generation ? 'volume-cancel' : 'read-cancel'); cancel.hidden = !active;
     cancel.onclick = async () => {
       const response = await fetch('/api/jobs/'+job.id,{method:'DELETE',headers:headers()});
-      if(response.ok){cancel.disabled=true;status.textContent='Отменяем задание; текущий набор останется прежним…';}
+      if(response.ok){cancel.disabled=true;status.textContent='Отменяем задание…';}
     };
     cancel.disabled = false; status.textContent = job.error || job.message;
     if (generation && job.target_bytes) {
@@ -181,8 +298,10 @@
     try {
       const operation = byId('volume-operation').value || 'replace';
       const target = targetBytes(byId('volume-target').value, byId('volume-unit').value, operation === 'replace' ? 20000000n : 1000000n); saveTarget();
+      if (operation === 'replace' && (startDate.value < startDate.min || startDate.value > startDate.max || endDate.value < endDate.min || endDate.value > endDate.max))
+        throw Error('Выберите даты периода продолжительностью до трёх лет.');
       const response = await fetch(operation === 'replace' ? '/api/jobs/generate' : '/api/jobs/resize', {method: 'POST', headers: {...headers(), 'Content-Type': 'application/json'},
-        body: JSON.stringify(operation === 'replace' ? {targetBytes: target} : {datasetId, operation, bytes: target})});
+        body: JSON.stringify(operation === 'replace' ? {targetBytes: target, startDate: startDate.value, endDate: endDate.value} : {datasetId, operation, bytes: target})});
       const job = await response.json(); if (!response.ok) throw Error(job.error || 'Не удалось начать генерацию.');
       remember(job.id, 'generation'); jobUi(job); poll(job.id, 'generation');
     } catch (error) { byId('volume-status').textContent = error.message; button.disabled = false; }
@@ -205,7 +324,7 @@
   if (runtime) {
     fetch('/api/document-reader').then(r => r.json()).then(info => {
       byId('read-capabilities').textContent = `Чтение DOCX, XLSX, CSV и текстового PDF доступно. OCR: ${info.ocr ? 'доступен' : 'нужны Tesseract и Poppler'}. Языки: ${info.languages.join(', ') || 'не установлены'}.`;
-    }).catch(() => byId('read-capabilities').textContent = 'Не удалось проверить доступность движков.');
+    }).catch(() => byId('read-capabilities').textContent = 'Не удалось проверить, доступно ли распознавание PDF.');
     // Restore at most the last job of each kind after a reload.
     for (const kind of ['reading', 'generation', 'import']) { const job = remembered.filter(x => x.kind === kind).at(-1); if (job) poll(job.id, kind); }
     loadVolume().catch(e => byId('volume-summary').textContent = e.message);

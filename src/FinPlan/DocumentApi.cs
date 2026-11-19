@@ -27,17 +27,21 @@ public static partial class DocumentApi
             {
                 using var json = await JsonDocument.ParseAsync(context.Request.Body, cancellationToken: context.RequestAborted);
                 var target = json.RootElement.GetProperty("targetBytes").GetInt64();
+                var period = GenerationPeriod.Parse(
+                    json.RootElement.TryGetProperty("startDate", out var start) ? start.GetString() : null,
+                    json.RootElement.TryGetProperty("endDate", out var end) ? end.GetString() : null);
                 if (target < 20_000_000) return Results.BadRequest(new { error = "Минимальный целевой объём 20 МБ." });
                 var free = new DriveInfo(Path.GetPathRoot(store.Current.Directory)!).AvailableFreeSpace;
                 if (target > free - 5_000_000_000) return Results.BadRequest(new { error = "Для временного создания нового набора нужно свободное место на его объём и ещё 5 ГБ." });
                 var id = Guid.NewGuid().ToString("N");
                 var view = jobs.Enqueue(id, "generation", async (progress, cancellation) =>
                 {
-                    var snapshot = await store.RegenerateAsync(targetBytes: target, progress: progress, cancellation: cancellation);
+                    var snapshot = await store.RegenerateAsync(targetBytes: target, progress: progress, cancellation: cancellation, period: period);
                     return new(Url: $"/datasets/{snapshot.Id}/calendar_view.html#/generation", Warnings: store.CleanupWarning is { } warning ? [warning] : [], Bytes: snapshot.Data.Volume!.TotalBytes);
                 }, target);
                 return Results.Json(view, JsonFiles.Options, statusCode: 202);
             }
+            catch (ArgumentException e) { return Results.BadRequest(new { error = e.Message }); }
             catch (GenerationBusyException e) { return Results.Json(new { error = e.Message }, statusCode: 409); }
             catch (Exception e) when (e is JsonException or KeyNotFoundException or InvalidOperationException or FormatException)
             { return Results.BadRequest(new { error = "Укажите целевой объём целым числом байт." }); }

@@ -8,9 +8,9 @@
   const categories = {revenue:'Выручка',cost_of_sales:'Себестоимость',operating_expenses:'Операционные расходы',customer_receipts:'Поступления от покупателей',supplier_payments:'Оплата поставщикам',operating_payments:'Текущие услуги',equipment_purchase:'Оборудование',loan_received:'Получение займа',loan_repaid:'Погашение займа'};
   const all = D.obligations.length + D.corpus.obligations;
   const note = document.createElement('p'); note.id = 'corpus-accounting-summary'; note.className = 'notice';
-  note.textContent = `В расчётах: ${count(all)} обязательств, ${count(D.operations.length + D.corpus.operations)} банковских операций, ${count(D.accruals.length + D.corpus.accruals)} начислений. Учтён весь корпус из ${count(D.corpus.files)} файлов. Итоги пересчитываются по выбранной дате; исходные записи открываются по страницам.`;
-  $('notice').after(note);
-  if (!online) note.textContent += ' Для постраничных расшифровок запустите веб-приложение.';
+  note.textContent = `В расчётах: ${count(all)} обязательств, ${count(D.operations.length + D.corpus.operations)} банковских операций, ${count(D.accruals.length + D.corpus.accruals)} начислений. Файлов в расчёте: ${count(D.corpus.files)}.`;
+  $('session-message').after(note);
+  if (!online) note.textContent += ' Чтобы открыть отдельные записи, запустите приложение в Rider.';
   const states = new Map(); let sequence = 0;
   function pagination(anchor, key) {
     let node = $(key + '-pager');

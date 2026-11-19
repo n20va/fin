@@ -17,7 +17,7 @@ function app(runtime = null, fetch = async () => { throw Error('Unexpected fetch
   const store = new Map(), timers = []; let target = null;
   store.set('finplan-document-jobs', JSON.stringify(savedJobs));
   const context = vm.createContext({document: {getElementById: node, querySelectorAll: () => []}, window: {finplanRuntime: runtime},
-    BASE: {documents: [{path: 'documents/user.docx'}], ...extraBase}, esc: s => String(s).replace(/</g, '&lt;'),
+    BASE: {opening_date: '2026-10-01', end: '2026-12-31', documents: [{path: 'documents/user.docx'}], ...extraBase}, esc: s => String(s).replace(/</g, '&lt;'),
     localStorage: {getItem: key => store.get(key) ?? null, setItem: (key, value) => store.set(key, value)},
     location: {pathname: '/datasets/initial/calendar_view.html', assign: url => {target = url;}}, fetch, console,
     setTimeout: fn => timers.push(fn), Intl, FormData: class {append() {}}});
@@ -62,12 +62,20 @@ test('Web generation sends 50 GB to the background job API and displays progress
     requests.push({url, options});
     if (url === '/api/document-reader') return {json: async () => ({libreOffice: true, ocr: true, languages: ['rus', 'eng']})};
     if (url === '/api/jobs/generate') {
-      assert.equal(JSON.parse(options.body).targetBytes, 50_000_000_000);
+      assert.deepEqual(JSON.parse(options.body), {targetBytes: 50_000_000_000, startDate: '2028-02-29', endDate: '2031-02-28'});
       assert.equal(options.headers['X-FinPlan-Token'], 'test-token');
       return {ok: true, json: async () => ({id: 'a'.repeat(32), kind: 'generation', state: 'running', target_bytes: 50_000_000_000, bytes: 25_000_000_000, obligations: 100, message: 'Запись реестров'})};
     }
     return {ok: true, json: async () => ({id: 'a'.repeat(32), kind: 'generation', state: 'running', target_bytes: 50_000_000_000, bytes: 25_000_000_000, obligations: 100, message: 'Запись реестров'})};
   });
+  a.nodes.get('volume-start').value = '2028-02-29';
+  a.nodes.get('volume-start').onchange();
+  assert.equal(a.nodes.get('volume-end').max, '2031-02-28');
+  a.nodes.get('volume-end').value = '2031-03-01';
+  await a.nodes.get('volume-form').onsubmit({preventDefault() {}});
+  assert.match(a.nodes.get('volume-status').textContent, /до трёх лет/);
+  assert.ok(!requests.some(({url}) => url === '/api/jobs/generate'));
+  a.nodes.get('volume-end').value = '2031-02-28';
   await a.nodes.get('volume-form').onsubmit({preventDefault() {}});
   assert.equal(a.nodes.get('volume-submit').disabled, true);
   assert.equal(a.nodes.get('volume-progress').value, 50);
@@ -153,7 +161,7 @@ for (const operation of ['add', 'remove']) test(`Dataset ${operation} submits a 
   await a.nodes.get('volume-form').onsubmit({preventDefault() {}});
   assert.deepEqual(submitted, {datasetId: 'initial', operation, bytes: 1_500_000});
   assert.equal(a.nodes.get('volume-operation').disabled, true);
-  assert.equal(a.nodes.get('volume-submit').textContent, operation === 'add' ? 'Догенерировать данные' : 'Уменьшить датасет');
+  assert.equal(a.nodes.get('volume-submit').textContent, operation === 'add' ? 'Догенерировать данные' : 'Удалить часть данных');
   assert.match(a.nodes.get('volume-action-help').textContent, operation === 'add' ? /Существующие записи сохраняются/ : /Контрольные документы/);
 });
 

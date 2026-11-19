@@ -116,3 +116,21 @@ test('Large corpus money keeps every minor unit in the displayed amount', () => 
   assert.match(text, /593,56/);
   assert.match(app.run("fmt('-0.01','CHF')"), /-0,01/);
 });
+
+test('Forecast start and end can narrow the calendar independently of the dataset', () => {
+  const app = viewer('#/calendar');
+  const start = app.nodes.get('asof'), end = app.nodes.get('forecast-end');
+  assert.equal(start.min, app.run('BASE.opening_date'));
+  start.value = start.min;
+  start.onchange();
+  end.value = start.value;
+  end.onchange();
+  assert.equal(app.run('D.calendar.length'), 1);
+  assert.equal(app.run('D.calendar[0].date'), start.value);
+  assert.equal(app.run('D.end'), app.run('BASE.end'));
+  assert.equal(app.run('D.reports.end_exclusive'), start.value);
+  start.value = '2026-12-31';
+  start.onchange();
+  assert.equal(start.value, end.value);
+  assert.match(app.nodes.get('session-message').textContent, /Выберите начало и конец/);
+});
